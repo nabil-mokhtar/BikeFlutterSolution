@@ -1,24 +1,21 @@
 import 'dart:convert';
 //import 'dart:html';
 
-import 'package:shiref_bike/services/api.dart';
 import 'package:http/http.dart' as http;
 
 class apiService {
-  apiService(this.api);
+  apiService(this.api_key, this.api_pass);
 
-  final API api;
-
+  String api_key;
+  String api_pass;
   Future<String> getAccesToken() async {
-    print(api.api_key);
-    print(api.api_pass);
+    print(api_key);
+    print(api_pass);
     final response = await http.post(
         'http://nabilmokhtar.pythonanywhere.com/api-token-auth/', // https://
         //  api.tokenUri().toString(),
-        body: jsonEncode(<String, String>{
-          'username': api.api_key,
-          'password': api.api_pass
-        }),
+        body: jsonEncode(
+            <String, String>{'username': api_key, 'password': api_pass}),
         headers: {"Content-Type": "application/json"});
 
     if (response.statusCode == 200) {

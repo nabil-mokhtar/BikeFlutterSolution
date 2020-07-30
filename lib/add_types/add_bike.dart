@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shiref_bike/pages/add.dart';
 import 'package:http/http.dart' as http;
@@ -16,12 +17,21 @@ class add_bike extends StatefulWidget {
 
 class _add_bikeState extends State<add_bike> {
   final _formkey = GlobalKey<FormState>();
-  String _name_product, _descripto, _product_cost, _rent_cost;
+  String _name_product,
+      _descripto,
+      _product_cost,
+      _rent_cost,
+      _rentperday,
+      _rentperweek,
+      _branch;
   File _image;
+  List<Asset> _images = List<Asset>();
+
+  bool photo_exist = false;
 
   Widget _textT() {
     return Text(
-      'Add Product',
+      'Add Bike',
       style: TextStyle(
           color: Colors.grey[700], fontSize: 18, fontWeight: FontWeight.bold),
     );
@@ -29,10 +39,11 @@ class _add_bikeState extends State<add_bike> {
 
   Widget _description() {
     return Padding(
-      padding: EdgeInsets.only(top: 20),
+      padding: EdgeInsets.only(top: 10),
       child: TextFormField(
         onSaved: (newValue) => _descripto = newValue,
         controller: holder,
+        validator: (value) => value.length > 0 ? null : "enter description",
         decoration: InputDecoration(
           border: OutlineInputBorder(),
           labelText: 'discription',
@@ -45,23 +56,30 @@ class _add_bikeState extends State<add_bike> {
   final idholder = TextEditingController();
   final holder = TextEditingController();
   final rentholder = TextEditingController();
+  final rentholderd = TextEditingController();
+  final rentholderw = TextEditingController();
+  final bholder = TextEditingController();
+
   final priceholder = TextEditingController();
 
   clearTextInput() {
     idholder.clear();
     holder.clear();
     rentholder.clear();
+    rentholderd.clear();
+    rentholderw.clear();
     priceholder.clear();
+    bholder.clear();
   }
 
   Widget _productname() {
     return Padding(
-      padding: EdgeInsets.only(top: 20),
+      padding: EdgeInsets.only(top: 10),
       child: TextFormField(
         controller: idholder,
         onSaved: (val) => _name_product = val,
         // keyboardType: TextInputType.number,
-        // validator: (val) => val.length > 3 ? 'Enter correct ID number' : null,
+        validator: (val) => val.length > 0 ? null : 'Enter correct name',
         decoration: InputDecoration(
             border: OutlineInputBorder(),
             labelText: 'Bike Model',
@@ -74,13 +92,30 @@ class _add_bikeState extends State<add_bike> {
     );
   }
 
+  Widget _branchname() {
+    return Padding(
+      padding: EdgeInsets.only(top: 10),
+      child: TextFormField(
+        controller: bholder,
+        onSaved: (val) => _branch = val,
+        // keyboardType: TextInputType.number,
+        validator: (val) => val.length > 0 ? null : 'Enter correct name',
+        decoration: InputDecoration(
+          labelText: 'branch',
+          border: OutlineInputBorder(),
+        ),
+      ),
+    );
+  }
+
   Widget _priceinput() {
     return Padding(
-      padding: EdgeInsets.only(top: 20),
+      padding: EdgeInsets.only(top: 10),
       child: TextFormField(
         controller: priceholder,
         onSaved: (val) => _product_cost = val,
         keyboardType: TextInputType.number,
+        validator: (val) => val.length > 0 ? null : 'Enter correct price',
         decoration: InputDecoration(
             suffixText: 'EGP',
             suffixStyle: TextStyle(color: Colors.green),
@@ -97,7 +132,7 @@ class _add_bikeState extends State<add_bike> {
 
   Widget _rentprice() {
     return Padding(
-      padding: EdgeInsets.only(top: 20),
+      padding: EdgeInsets.only(top: 10),
       child: TextFormField(
         controller: rentholder,
         onSaved: (val) => _rent_cost = val,
@@ -108,8 +143,54 @@ class _add_bikeState extends State<add_bike> {
             suffixText: 'EGP',
             suffixStyle: TextStyle(color: Colors.green),
             border: OutlineInputBorder(),
-            labelText: 'Rent Cost',
+            labelText: 'Rent per month Cost',
             hintText: 'Rent per month',
+            icon: Icon(
+              Icons.attach_money,
+              color: Colors.grey[700],
+            )),
+      ),
+    );
+  }
+
+  Widget _rentperdayprice() {
+    return Padding(
+      padding: EdgeInsets.only(top: 10),
+      child: TextFormField(
+        controller: rentholderd,
+        onSaved: (val) => _rentperday = val,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+            enabled: !_isEnabled,
+            filled: _isEnabled,
+            suffixText: 'EGP',
+            suffixStyle: TextStyle(color: Colors.green),
+            border: OutlineInputBorder(),
+            labelText: 'Rent per day Cost',
+            hintText: 'Rent per day',
+            icon: Icon(
+              Icons.attach_money,
+              color: Colors.grey[700],
+            )),
+      ),
+    );
+  }
+
+  Widget _rentperweekprice() {
+    return Padding(
+      padding: EdgeInsets.only(top: 10),
+      child: TextFormField(
+        controller: rentholderw,
+        onSaved: (val) => _rentperweek = val,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+            enabled: !_isEnabled,
+            filled: _isEnabled,
+            suffixText: 'EGP',
+            suffixStyle: TextStyle(color: Colors.green),
+            border: OutlineInputBorder(),
+            labelText: 'Rent per week  Cost',
+            hintText: 'Rent per week',
             icon: Icon(
               Icons.attach_money,
               color: Colors.grey[700],
@@ -133,12 +214,10 @@ class _add_bikeState extends State<add_bike> {
   }
 
   void _submit() {
-    if (_formkey.currentState.validate()) {
+    if (_formkey.currentState.validate() && photo_exist == true) {
       _formkey.currentState.save();
       clearTextInput();
       _upload(_image);
-
-      // print('id:$_service_name ');
     } else {
       print('not !');
     }
@@ -180,12 +259,13 @@ class _add_bikeState extends State<add_bike> {
   Future getImage() async {
     // ignore: deprecated_member_use
     var image = await ImagePicker.pickImage(
-        source: ImageSource.camera,
+        source: ImageSource.gallery,
         imageQuality: 50, // <- Reduce Image quality
         maxHeight: 500, // <- reduce the image size
         maxWidth: 500);
     setState(() {
       this._image = File(image.path);
+      this.photo_exist = true;
     });
   }
   // String _name_product, _descripto, _product_cost,_rent_cost;
@@ -206,14 +286,15 @@ class _add_bikeState extends State<add_bike> {
       "model": _name_product,
       "serial": "000",
       "availability": true,
-      "rentability": true,
-      "availabilityDuration": "00:00:02",
+      "rentability": _isEnabled,
+      "availabilityDuration": " avilable",
       "description": _descripto,
       "sellPrice": _product_cost,
-      "rentPerDay": 1,
-      "rentPerWeek": 1,
+      "rentPerDay": _rentperday,
+      "rentPerWeek": _rentperweek,
       "rentPerMonth": _rent_cost,
-      "branche": 1,
+      "branche": _branch,
+      "images": _images,
     });
 
     Dio dio = new Dio();
@@ -221,8 +302,7 @@ class _add_bikeState extends State<add_bike> {
     dio.options.headers["Content-Type"] = "application/json";
 
     dio
-        .post("http://nabilmokhtar.pythonanywhere.com/Products/Bike/",
-            data: data)
+        .post("http://nabilmokhtar.pythonanywhere.com/apiBike/", data: data)
         .then((response) => print(response))
         .catchError((error) => print(error));
   }
@@ -269,7 +349,10 @@ class _add_bikeState extends State<add_bike> {
                     _camera(),
                     _priceinput(),
                     _rentprice(),
+                    _rentperweekprice(),
+                    _rentperdayprice(),
                     _description(),
+                    _branchname(),
                     _submitbtn(),
                   ],
                 ))),

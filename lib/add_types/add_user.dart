@@ -22,8 +22,15 @@ class _add_userState extends State<add_user> {
   DateTime _date;
   TimeOfDay _time;
   String _phonenum;
+  var Cami = Colors.grey;
+  var Camu = Colors.grey;
 
-  bool _t = false, _d = false, _q = false;
+  bool _t = false,
+      _d = false,
+      _q = false,
+      f = false,
+      flag1 = false,
+      flag2 = false;
   Widget _textT() {
     return Text(
       'Resigter your loyal customer only',
@@ -79,13 +86,64 @@ class _add_userState extends State<add_user> {
   final phoneholder = TextEditingController();
 
   File _image;
+  File _userImage;
+
+  Widget _ucamera() {
+    return ButtonBar(
+      children: [
+        IconButton(
+          icon: Icon(Icons.camera_enhance),
+          color: Camu,
+          onPressed: () async {
+            try {
+              await ugetImage();
+            } catch (e) {
+              setState(() {
+                this.Camu = Colors.red;
+              });
+            }
+          },
+          tooltip: 'shoot picture',
+        )
+      ],
+    );
+  }
+
+  Future ugetImage() async {
+    // ignore: deprecated_member_use
+    var image = await ImagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 50, // <- Reduce Image quality
+        maxHeight: 500, // <- reduce the image size
+        maxWidth: 500);
+    setState(() {
+      try {
+        this._userImage = File(image.path);
+        this.Camu = Colors.green;
+
+        this.flag1 = true;
+      } catch (e) {
+        this.Camu = Colors.red;
+      }
+    });
+  }
+  // String _name_product, _descripto, _product_cost,_rent_cost;
 
   Widget _camera() {
     return ButtonBar(
       children: [
         IconButton(
           icon: Icon(Icons.camera_enhance),
-          onPressed: () async => await getImage(),
+          color: Cami,
+          onPressed: () async {
+            try {
+              await getImage();
+            } catch (e) {
+              setState(() {
+                this.Cami = Colors.red;
+              });
+            }
+          },
           tooltip: 'shoot picture',
         )
       ],
@@ -115,14 +173,29 @@ class _add_userState extends State<add_user> {
   }
 
   void _submit() {
-    if (_formkey.currentState.validate()) {
-      _formkey.currentState.save();
-      clearTextInput();
-      _upload(_image);
-      print(
-          'id:$_userid , price :$_rentcost ,return Date: $_date ,return time: $_time ,CODE: $_qr ');
+    if (flag1 == true && flag2 == true) {
+      if (_formkey.currentState.validate()) {
+        _formkey.currentState.save();
+        clearTextInput();
+        try {
+          _upload(_image, _userImage);
+        } catch (e) {
+          print("connection error");
+        }
+
+        print(
+            'id:$_userid , price :$_rentcost ,return Date: $_date ,return time: $_time ,CODE: $_qr ');
+        setState(() {
+          Cami = Colors.grey;
+          Camu = Colors.grey;
+          flag1 = false;
+          flag2 = false;
+        });
+      } else {
+        print('not !');
+      }
     } else {
-      print('not !');
+      fail();
     }
   }
 
@@ -176,22 +249,33 @@ class _add_userState extends State<add_user> {
         maxHeight: 500, // <- reduce the image size
         maxWidth: 500);
     setState(() {
-      this._image = File(image.path);
+      try {
+        this._image = File(image.path);
+        this.flag2 = true;
+        this.Cami = Colors.green;
+      } catch (e) {
+        this.Cami = Colors.red;
+      }
     });
   }
   // String _name_product, _descripto, _product_cost,_rent_cost;
 
-  void _upload(File file) async {
+  void _upload(File file, File ufile) async {
     final prefs = await SharedPreferences.getInstance();
 
     final token = prefs.getString('token') ?? 0;
-
-    String fileName = file.path.split('/').last;
+    String fileName;
+    fileName = file.path.split('/').last;
+    String ufileName = ufile.path.split('/').last;
 
     FormData data = FormData.fromMap({
       "idImage": await MultipartFile.fromFile(
         file.path,
         filename: fileName,
+      ),
+      "userimage": await MultipartFile.fromFile(
+        ufile.path,
+        filename: ufileName,
       ),
       "name": _name,
       "userid": _userid,
@@ -208,6 +292,13 @@ class _add_userState extends State<add_user> {
         .post("http://nabilmokhtar.pythonanywhere.com/User/User/", data: data)
         .then((response) => print(response))
         .catchError((error) => print(error));
+  }
+
+  Widget fail() {
+    setState(() {
+      this.Cami = Colors.red;
+      this.Camu = Colors.red;
+    });
   }
 
   @override
@@ -239,8 +330,15 @@ class _add_userState extends State<add_user> {
                         _idInput(),
                         _username(),
                         _pass(),
-                        _camera(),
                         _phone(),
+                        Row(
+                          children: <Widget>[
+                            Text("id image"),
+                            _camera(),
+                            Text("user image"),
+                            _ucamera(),
+                          ],
+                        ),
                         _submitbtn(),
                       ],
                     ))),

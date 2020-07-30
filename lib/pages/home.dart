@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shiref_bike/lists/rentable_list.dart';
+import 'package:shiref_bike/lists/rented_list.dart';
 import 'package:shiref_bike/widgets/shared.dart';
 
 class home extends StatelessWidget {
@@ -35,7 +37,7 @@ class rentedView extends StatefulWidget {
 class _rentedViewState extends State<rentedView> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return rented_home_page();
   }
 }
 
@@ -47,6 +49,6 @@ class unrentedView extends StatefulWidget {
 class _unrentedViewState extends State<unrentedView> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return rentable_home_page();
   }
 }

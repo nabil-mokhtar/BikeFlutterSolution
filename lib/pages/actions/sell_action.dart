@@ -146,13 +146,14 @@ class _sell_actionState extends State<sell_action> {
     dio.options.headers["Content-Type"] = "application/json";
 //('id', 'notes', 'url')
     dio
-        .post("http://nabilmokhtar.pythonanywhere.com/Records/SellARecord/",
+        .post("http://nabilmokhtar.pythonanywhere.com/Records/SellRecord/",
             data: {
               "customer": _userid,
               "price": _sellcost,
               "notes": _note,
-              "accessories": _productName,
+              "product": _productName,
               "dateTime": "null",
+              "adminName": admin
             })
         .then((response) => print(response))
         .catchError((error) => print(error));

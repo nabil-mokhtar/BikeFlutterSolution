@@ -5,7 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shiref_bike/services/api.dart';
 import 'package:shiref_bike/services/api_service.dart';
 import 'package:http/http.dart' as http;
 
@@ -22,6 +21,7 @@ class add_service extends StatefulWidget {
 class _add_serviceState extends State<add_service> {
   final _formkey = GlobalKey<FormState>();
   String _name_service, _descripto, _service_cost;
+  bool photo_exist = false;
 
   Widget _textT() {
     return Text(
@@ -36,6 +36,7 @@ class _add_serviceState extends State<add_service> {
       padding: EdgeInsets.only(top: 20),
       child: TextFormField(
         onSaved: (newValue) => _descripto = newValue,
+        validator: (value) => value.length > 0 ? null : "enter descriptoin ",
         controller: holder,
         decoration: InputDecoration(
           border: OutlineInputBorder(),
@@ -61,8 +62,7 @@ class _add_serviceState extends State<add_service> {
       child: TextFormField(
         controller: idholder,
         onSaved: (val) => _name_service = val,
-        // keyboardType: TextInputType.number,
-
+        validator: (value) => value.length > 0 ? null : "enter service name",
         decoration: InputDecoration(
             border: OutlineInputBorder(),
             labelText: 'Service Name',
@@ -84,6 +84,7 @@ class _add_serviceState extends State<add_service> {
         controller: priceholder,
         onSaved: (val) => _service_cost = val,
         keyboardType: TextInputType.number,
+        validator: (value) => value.length > 0 ? null : "enter price",
         decoration: InputDecoration(
             suffixText: 'EGP',
             suffixStyle: TextStyle(color: Colors.green),
@@ -120,7 +121,7 @@ class _add_serviceState extends State<add_service> {
       //_upload();
       // print('id:$_service_name ');
     } else {
-      print('not !');
+      print('validation error');
     }
   }
 

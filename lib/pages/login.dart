@@ -3,7 +3,6 @@ import 'package:qrscan/qrscan.dart' as scanner;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shiref_bike/main.dart';
 import 'package:shiref_bike/pages/actions.dart';
-import 'package:shiref_bike/services/api.dart';
 import 'package:shiref_bike/services/api_service.dart';
 
 class login extends StatefulWidget {
@@ -75,8 +74,8 @@ class _loginState extends State<login> {
   Future<void> _submit() async {
     if (_formkey.currentState.validate()) {
       _formkey.currentState.save();
-      final api = API(api_key: _userid, api_pass: _passw);
-      final apiSer = apiService(api);
+
+      final apiSer = apiService(_userid, _passw);
       final accesstoken = await apiSer.getAccesToken();
 
       print('id:$_userid CODE:$_passw token :$accesstoken');

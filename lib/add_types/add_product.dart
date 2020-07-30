@@ -17,6 +17,7 @@ class _add_productState extends State<add_product> {
   final _formkey = GlobalKey<FormState>();
   String _name_product, _descripto, _product_cost;
   File _image;
+  bool _photo = false;
 
   Widget _textT() {
     return Text(
@@ -31,6 +32,7 @@ class _add_productState extends State<add_product> {
       padding: EdgeInsets.only(top: 20),
       child: TextFormField(
         onSaved: (newValue) => _descripto = newValue,
+        validator: (value) => value.length > 0 ? 'Enter description ' : null,
         controller: holder,
         decoration: InputDecoration(
           border: OutlineInputBorder(),
@@ -57,7 +59,7 @@ class _add_productState extends State<add_product> {
         controller: idholder,
         onSaved: (val) => _name_product = val,
         // keyboardType: TextInputType.number,
-        //  validator: (val) => val.length > 3 ? 'Enter correct ID number' : null,
+        validator: (val) => val.length > 3 ? 'Enter correct name ' : null,
         decoration: InputDecoration(
             border: OutlineInputBorder(),
             labelText: 'Product Name',
@@ -79,6 +81,7 @@ class _add_productState extends State<add_product> {
         controller: priceholder,
         onSaved: (val) => _product_cost = val,
         keyboardType: TextInputType.number,
+        validator: (value) => value.length > 0 ? 'Enter correct price' : null,
         decoration: InputDecoration(
             suffixText: 'EGP',
             suffixStyle: TextStyle(color: Colors.green),
@@ -108,14 +111,12 @@ class _add_productState extends State<add_product> {
   }
 
   void _submit() {
-    if (_formkey.currentState.validate()) {
+    if (_formkey.currentState.validate() && _photo == true) {
       _formkey.currentState.save();
       clearTextInput();
       _upload(_image);
-
-      // print('id:$_service_name ');
     } else {
-      print('not !');
+      print('error in validation');
     }
   }
 
@@ -134,11 +135,12 @@ class _add_productState extends State<add_product> {
   Future getImage() async {
     // ignore: deprecated_member_use
     var image = await ImagePicker.pickImage(
-        source: ImageSource.camera,
+        source: ImageSource.gallery,
         imageQuality: 50, // <- Reduce Image quality
         maxHeight: 500, // <- reduce the image size
         maxWidth: 500);
     setState(() {
+      this._photo = true;
       this._image = File(image.path);
     });
   }

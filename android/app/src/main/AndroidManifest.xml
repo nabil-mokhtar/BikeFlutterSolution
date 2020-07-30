@@ -1,10 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.shiref_bike">
+      <uses-permission android:name="android.permission.USE_FINGERPRINT"/>
+      <uses-permission android:name="android.permission.CAMERA"/>
+
+        
+
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
          In most cases you can leave this as-is, but you if you want to provide
          additional functionality it is fine to subclass or reimplement
          FlutterApplication and put your custom class here. -->
+
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="shiref_bike"
@@ -21,6 +27,7 @@
                  while the Flutter UI initializes. After that, this theme continues
                  to determine the Window background behind the Flutter UI. -->
             <meta-data
+            
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
@@ -44,4 +51,6 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+
 </manifest>
+

@@ -10,7 +10,7 @@ class rent_action extends StatefulWidget {
 
 class _rent_actionState extends State<rent_action> {
   final _formkey = GlobalKey<FormState>();
-  String _userid, _rentcost, _qr;
+  String _userid, _rentcost, _qr, _note;
   DateTime _date;
   TimeOfDay _time;
   bool _switchVal = false;
@@ -35,7 +35,6 @@ class _rent_actionState extends State<rent_action> {
         controller: idholder,
         onSaved: (val) => _userid = val,
         keyboardType: TextInputType.number,
-        validator: (val) => val.length != 14 ? 'Enter correct ID number' : null,
         decoration: InputDecoration(
             border: OutlineInputBorder(),
             labelText: 'UserId',
@@ -44,6 +43,24 @@ class _rent_actionState extends State<rent_action> {
               Icons.face,
               color: Colors.grey[700],
             )),
+      ),
+    );
+  }
+
+  final noteholder = TextEditingController();
+
+  Widget _notes() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: TextFormField(
+        onSaved: (newValue) => _note = newValue,
+        controller: noteholder,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: 'notes',
+          hintText: 'descripe issue or discout status ',
+        ),
+        maxLines: 2,
       ),
     );
   }
@@ -184,16 +201,16 @@ class _rent_actionState extends State<rent_action> {
     dio.options.headers["Authorization"] = "token $token";
     dio.options.headers["Content-Type"] = "application/json";
     dio
-        .post("http://nabilmokhtar.pythonanywhere.com/", data: {
-          "userid": _userid,
-          "price": _rentcost,
-          "open": _switchVal,
-          "date": _date,
-          "time": _time,
-          "QR": _qr,
-          "dateTime": "null",
-          "admin": admin
-        })
+        .post("http://nabilmokhtar.pythonanywhere.com/Records/RentRecords/",
+            data: {
+              "customer": _userid,
+              "bike": _qr,
+              "status": false,
+              "ends": "agdgy",
+              "note": _note,
+              "price": _rentcost,
+              "adminName": admin
+            })
         .then((response) => print(response))
         .catchError((error) => print(error));
   }
@@ -232,6 +249,7 @@ class _rent_actionState extends State<rent_action> {
                     _textT(),
                     _idInput(),
                     _priceinput(),
+                    _notes(),
                     _switch(),
                     _dataTime(),
                     _submitbtn(),
